@@ -1,0 +1,57 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="hero">
+    <h1 class="fade-in">Добре дошли в новия учебен корпус</h1>
+    <p class="fade-in delay-1">Модерна среда за обучение и развитие</p>
+    <button class="btn-main fade-in delay-2" onclick="showMessage()">Научи повече</button>
+</div>
+
+<div id="message" class="message"></div>
+
+<div class="slideshow">
+    <button class="arrow left" onclick="prevImage()">❮</button>
+    <img id="slide" src="/images/cassia.webp" class="fade-image visible" />
+    <button class="arrow right" onclick="nextImage()">❯</button>
+</div>
+
+<div class="encryption-link">
+    <a class="btn-main" asp-controller="Encryption" asp-action="Index">Go to Encryption Page</a>
+</div>
+
+<script>
+let images = [
+    "/images/cassia.webp",
+    "/images/images.jpeg",
+    "/images/Supreme_Sunny.webp"
+];
+
+let index = 0;
+let slide = document.getElementById("slide");
+
+function showNextImage() {
+    slide.classList.remove("visible");
+    setTimeout(() => {
+        index = (index + 1) % images.length;
+        slide.src = images[index];
+        slide.classList.add("visible");
+    }, 300);
+}
+
+function showPrevImage() {
+    slide.classList.remove("visible");
+    setTimeout(() => {
+        index = (index - 1 + images.length) % images.length;
+        slide.src = images[index];
+        slide.classList.add("visible");
+    }, 300);
+}
+
+function nextImage() { showNextImage(); }
+function prevImage() { showPrevImage(); }
+
+function showMessage() {
+    document.getElementById("message").innerText = "Това е нашият нов учебен корпус!";
+}
+</script>

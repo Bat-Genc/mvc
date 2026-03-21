@@ -1,0 +1,44 @@
+@model SchoolMvc.Models.EncryptionViewModel
+@{
+    ViewData["Title"] = "Encryption";
+}
+
+<h1>Encryption / Decryption</h1>
+
+<form asp-action="Index" asp-controller="Encryption" method="post" enctype="multipart/form-data">
+    <div>
+        <label for="decryptMode">
+            <input type="checkbox" id="decryptMode" name="decryptMode" value="true" @(Model.DecryptMode ? "checked" : "") />
+            Decrypt mode (treat input as encrypted data)
+        </label>
+    </div>
+
+    <div>
+        <label for="inputText">Input text:</label><br />
+        <textarea id="inputText" name="inputText" rows="6" cols="80">@Model.OriginalText</textarea>
+    </div>
+
+    <div>
+        <label for="uploadFile">Or upload .txt file:</label>
+        <input type="file" id="uploadFile" name="uploadFile" accept=".txt" />
+    </div>
+
+    <button type="submit">Process</button>
+</form>
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <p class="text-danger">@Model.ErrorMessage</p>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.EncryptedText))
+{
+    <h2>Encrypted text</h2>
+    <pre>@Model.EncryptedText</pre>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.DecryptedText))
+{
+    <h2>Decrypted text</h2>
+    <pre>@Model.DecryptedText</pre>
+}

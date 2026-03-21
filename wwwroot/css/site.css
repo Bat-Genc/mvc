@@ -1,0 +1,126 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+.hero {
+    text-align: center;
+    padding: 100px 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 1s forwards;
+}
+
+.delay-1 { animation-delay: 0.5s; }
+.delay-2 { animation-delay: 1s; }
+
+@keyframes fadeIn {
+    to { opacity: 1; }
+}
+
+.btn-main {
+    margin-top: 20px;
+    padding: 12px 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 6px;
+    background: #ff7f50;
+    color: white;
+    cursor: pointer;
+}
+
+.btn-main:hover {
+    background: #ff6347;
+}
+
+.slideshow {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.slideshow img {
+    width: 70%;
+    border-radius: 10px;
+}
+
+.message {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 20px;
+    color: #333;
+}
+.fade-image {
+    transition: opacity 0.5s ease-in-out;
+    opacity: 0;
+}
+
+.fade-image.visible {
+    opacity: 1;
+}
+
+.slideshow {
+    position: relative;
+    text-align: center;
+    margin-top: 40px;
+}
+
+.slideshow img {
+    width: 70%;
+    border-radius: 10px;
+}
+
+.arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 30px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.arrow.left {
+    left: 10%;
+}
+
+.arrow.right {
+    right: 10%;
+}
+
+.arrow:hover {
+    background: rgba(0,0,0,0.8);
+}
