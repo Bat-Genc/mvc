@@ -18,14 +18,15 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
+// 🔥 За .NET 8 – премахнати MapStaticAssets и WithStaticAssets
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// 🔥 ДОБАВИ ТОВА ЗА RENDER (и други cloud хостинги)
+// За статични файлове (CSS, JS, изображения)
+app.UseStaticFiles();
+
+// За Render – слушай на правилния порт
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 app.Urls.Add($"http://0.0.0.0:{port}");
 
