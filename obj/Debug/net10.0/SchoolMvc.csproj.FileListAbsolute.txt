@@ -95,3 +95,4 @@
 /home/oni/Disc_D/SchoolMvc/obj/Debug/net10.0/SchoolMvc.genruntimeconfig.cache
 /home/oni/Disc_D/SchoolMvc/obj/Debug/net10.0/ref/SchoolMvc.dll
 /home/oni/Disc_D/SchoolMvc/obj/Debug/net10.0/compressed/k526w33pze-{0}-k1ri2870gp-k1ri2870gp.gz
+/home/oni/Disc_D/SchoolMvc/obj/Debug/net10.0/SchoolMvc.sourcelink.json
