@@ -1,6 +1,6 @@
 @model SchoolMvc.Models.EncryptionViewModel
 @{
-    ViewData["Title"] = Model.DecryptMode ? "Декриптиране" : "Криптиране";
+    ViewData["Title"] = "";
     ViewData["Page"] = "encrypt";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -13,7 +13,6 @@
 
     <form asp-action="Index" asp-controller="Encryption" method="post" enctype="multipart/form-data">
 
-        {{/* Switch */}}
         <div class="enc-switch">
             <label class="switch">
                 <input type="checkbox" id="decryptMode" name="decryptMode" value="true"
@@ -26,19 +25,16 @@
             </span>
         </div>
 
-        {{/* Парола */}}
         <div class="enc-password">
-            <label class="enc-label" for="password">// ПАРОЛА</label>
+            <label class="enc-label" for="password">ПАРОЛА</label>
             <input class="enc-input" type="text" id="password" name="password"
                    value="@Model.Password" placeholder="въведи парола..." />
         </div>
 
-        {{/* Вход */}}
-        <label class="enc-label">// ВХОДЕН ТЕКСТ</label>
+        <label class="enc-label">ВХОДЕН ТЕКСТ</label>
         <textarea class="enc-textarea" id="inputText" name="inputText"
                   placeholder="въведи текст за обработка...">@Model.OriginalText</textarea>
 
-        {{/* Бутони */}}
         <div class="enc-actions">
             <label class="btn-file">
                 ⬆ ИЗБЕРИ ФАЙЛ
@@ -56,16 +52,15 @@
         }
     </form>
 
-    {{/* Изход */}}
     @if (!string.IsNullOrWhiteSpace(Model.EncryptedText))
     {
-        <h2 class="enc-output-title">// <span>КРИПТИРАН</span> ТЕКСТ</h2>
+        <h2 class="enc-output-title">КРИПТИРАН ТЕКСТ</h2>
         <div class="enc-output">@Model.EncryptedText</div>
     }
 
     @if (!string.IsNullOrWhiteSpace(Model.DecryptedText))
     {
-        <h2 class="enc-output-title" style="margin-top:40px;">// <span>ДЕКРИПТИРАН</span> ТЕКСТ</h2>
+        <h2 class="enc-output-title" style="margin-top:40px;">ДЕКРИПТИРАН ТЕКСТ</h2>
         <div class="enc-output">@Model.DecryptedText</div>
     }
 </div>
