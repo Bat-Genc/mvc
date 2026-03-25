@@ -1,0 +1,123 @@
+@{
+    ViewData["Title"] = "Как работи";
+    ViewData["Page"] = "explain";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page exp-page">
+
+    <h1 class="exp-title">КАК <span>РАБОТИ</span> АЛГОРИТЪМЪТ</h1>
+
+    <p class="exp-text">
+        Това е персонализиран многослоен шифър, базиран на 30 "дневника" —
+        таблици за замяна на символи. Паролата определя кои дневници се използват и в какъв ред.
+    </p>
+
+    {{/* Стъпки */}}
+    <div class="exp-section">
+        <div class="exp-step">
+            <div class="exp-step-num">01</div>
+            <div class="exp-step-content">
+                <h3>ПАРОЛА → ОФСЕТ</h3>
+                <p>Специалните символи в паролата се маркират с 1, останалите с 0.
+                Получената binary стойност се конвертира в число → начален офсет.</p>
+            </div>
+        </div>
+
+        <div class="exp-step">
+            <div class="exp-step-num">02</div>
+            <div class="exp-step-content">
+                <h3>БУКВА → ДНЕВНИК</h3>
+                <p>Всяка буква от паролата избира дневник: индекс на буквата + офсет (mod 30).
+                Цифрите в паролата увеличават офсета динамично.</p>
+            </div>
+        </div>
+
+        <div class="exp-step">
+            <div class="exp-step-num">03</div>
+            <div class="exp-step-content">
+                <h3>МНОГОСЛОЙНО КРИПТИРАНЕ</h3>
+                <p>Всеки дневник прилага пълен проход върху текста. Последният проход
+                трансформира всяка буква в група от 2-5 кирилски букви + разделител.</p>
+            </div>
+        </div>
+
+        <div class="exp-step">
+            <div class="exp-step-num">04</div>
+            <div class="exp-step-content">
+                <h3>ШУМ И МАСКИРАНЕ</h3>
+                <p>Между групите се вмъкват 1-2 случайни символа от арабски, китайски,
+                японски, корейски и други азбуки — за допълнително объркване.</p>
+            </div>
+        </div>
+
+        <div class="exp-step">
+            <div class="exp-step-num">05</div>
+            <div class="exp-step-content">
+                <h3>ПОЗИЦИОННА РОТАЦИЯ</h3>
+                <p>Позицията на всяка буква в текста участва в избора на група —
+                така едната и съща буква изглежда различно на всяко място в текста.</p>
+            </div>
+        </div>
+    </div>
+
+    {{/* Примерни дневници */}}
+    <div class="exp-section">
+        <div class="exp-section-title">// ПРИМЕРНИ ДНЕВНИЦИ</div>
+        <div class="exp-box" id="notebooks-box">
+            <div style="color:var(--text-muted);font-size:13px;">Зареждане на примерни дневници...</div>
+        </div>
+    </div>
+
+    {{/* Пример стъпка по стъпка */}}
+    <div class="exp-section">
+        <div class="exp-section-title">// ПРИМЕР: "тест" с парола "ав"</div>
+        <div class="exp-box">
+            <div class="exp-example">
+                <div class="label">Стъпка 1 — Офсет</div>
+                <div class="value">Парола "ав" → няма специални символи → офсет = 0</div>
+            </div>
+            <div class="exp-example">
+                <div class="label">Стъпка 2 — Последователност дневници</div>
+                <div class="value">"а" (поз.0) + офсет 0 = Дневник 0 → "в" (поз.2) + офсет 0 = Дневник 2</div>
+            </div>
+            <div class="exp-example">
+                <div class="label">Стъпка 3 — Проход 1 (Дневник 0, char→char)</div>
+                <div class="value">т→х, е→у, с→ж, т→х</div>
+            </div>
+            <div class="exp-example">
+                <div class="label">Стъпка 4 — Проход 2 (Дневник 2, групово)</div>
+                <div class="value">х → [група 2-5 букви] + разделител + шум</div>
+            </div>
+            <div class="exp-example">
+                <div class="label">Резултат</div>
+                <div class="value" style="color:var(--red);">хужч¬あгъ의°жеаж®хужч=</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+<script>
+// Показваме примерни дневници визуално
+const alphabet = 'абвгдежзийклмнопрстуфхцчшщъьюя'.split('');
+const box = document.getElementById('notebooks-box');
+let html = '';
+for (let n = 0; n < 3; n++) {
+    html += `<div style="margin-bottom:20px;">`;
+    html += `<div style="color:var(--red);font-size:12px;letter-spacing:0.1em;margin-bottom:8px;">ДНЕВНИК ${n}</div>`;
+    html += `<div style="display:flex;flex-wrap:wrap;gap:6px;">`;
+    const shuffled = [...alphabet].sort(() => Math.random() - 0.5);
+    alphabet.forEach((c, i) => {
+        html += `<span style="background:var(--surface2);border:1px solid var(--border);padding:4px 8px;font-size:13px;">
+            <span style="color:var(--text-muted)">${c}</span>
+            <span style="color:var(--red)">→</span>
+            <span style="color:var(--text)">${shuffled[i]}</span>
+        </span>`;
+    });
+    html += `</div></div>`;
+}
+box.innerHTML = html;
+</script>
+}

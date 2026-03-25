@@ -1,57 +1,58 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Начало";
+    ViewData["Page"] = "home";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="hero">
-    <h1 class="fade-in">Добре дошли в новия учебен корпус</h1>
-    <p class="fade-in delay-1">Модерна среда за обучение и развитие</p>
-    <button class="btn-main fade-in delay-2" onclick="showMessage()">Научи повече</button>
+<div class="page">
+    <div class="home-hero">
+        <h1>CIPHER<span>X</span></h1>
+        <p>Добре дошли в проекта за криптиране на данни.</p>
+    </div>
+
+    <div class="home-intro">
+        Криптирането е <strong>изкуство</strong> и <strong>наука</strong> —
+        трансформиране на четим текст в нечетим, защитен с парола.
+    </div>
+
+    <div class="home-cards">
+        <!-- Лява карта: Криптиран текст -->
+        <div class="home-card" data-label="КРИПТИРАН ТЕКСТ">
+            <div style="font-family: var(--mono); font-size: 12px; padding: 20px; text-align: left; word-break: break-all; line-height: 1.6;">
+                <div style="margin-bottom: 16px;">
+                    <div style="color: var(--text-muted); font-size: 10px; margin-bottom: 6px;">📄 ОРИГИНАЛ</div>
+                    <div style="color: var(--text); font-size: 13px; font-weight: 500;">"Императора на седемте ада и Повелителя на десетте рая"</div>
+                </div>
+                
+                <div style="margin: 20px 0; border-top: 1px solid var(--border);"></div>
+                
+                <div>
+                    <div style="color: var(--text-muted); font-size: 10px; margin-bottom: 8px;">🔐 КРИПТИРАН</div>
+                    <div style="color: var(--red); font-size: 11px; background: var(--surface2); padding: 14px; border-radius: 6px; border-left: 3px solid var(--red); word-break: break-all; line-height: 1.5;">
+                        @Html.Raw("Йбб&amp;카тшп°삶сбо*ثйтк&gt;대зфр/いнпю}ผดмню¡კალგ¡ბბუნ|եтшп#فか¦]€рчж¥是шшфµჟი€®µ~/кйш¿ถьвя_սշշф|صրամալգ~たжцд*为бхв@ทนпю‡ちհ]/%бун@უზააშტ+国պьшд€ص¬{‡×_езп±գ¥‡©$µБхв°うбун^不рчж×파дож*ฝլվիյու®要իйтч÷դբզֆր®ظրամაშტ=あалг~майтч*삶[¥еза&gt;იщщм|га%+¡алг+галգցցс¡我კеза¥有осх¤ضこосх@พวюк§国вию¶ն°#¦ցցս=นดอจ#타วิย¡น÷+*×")
+                    </div>
+                </div>
+            </div>
+            <div style="border-top: 1px solid var(--border); padding: 12px 20px; font-size: 10px; color: var(--text-muted);">
+                <span style="color: var(--red);">парола:</span> проклятие
+            </div>
+        </div>
+
+        <!-- Дясна карта: Фази на криптиране (само стрелки и имена) -->
+        <div class="home-card" data-label="ФАЗИ НА КРИПТИРАНЕ">
+            <div style="padding: 24px 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px; flex-wrap: wrap;">
+                    <span style="color: var(--text); font-size: 12px; font-weight: 500;">ЗАМЯНА</span>
+                    <span style="color: var(--red); font-size: 18px; font-weight: bold;">⟷</span>
+                    <span style="color: var(--text); font-size: 12px; font-weight: 500;">ГРУПИРАНЕ</span>
+                    <span style="color: var(--red); font-size: 18px; font-weight: bold;">⟷</span>
+                    <span style="color: var(--text); font-size: 12px; font-weight: 500;">ШУМ</span>
+                    <span style="color: var(--red); font-size: 18px; font-weight: bold;">⟷</span>
+                    <span style="color: var(--text); font-size: 12px; font-weight: 500;">РОТАЦИЯ</span>
+                    <span style="color: var(--red); font-size: 18px; font-weight: bold;">⟷</span>
+                    <span style="color: var(--text); font-size: 12px; font-weight: 500;">ФИНАЛ</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
-<div id="message" class="message"></div>
-
-<div class="slideshow">
-    <button class="arrow left" onclick="prevImage()">❮</button>
-    <img id="slide" src="/images/cassia.webp" class="fade-image visible" />
-    <button class="arrow right" onclick="nextImage()">❯</button>
-</div>
-
-<div class="encryption-link">
-    <a class="btn-main" asp-controller="Encryption" asp-action="Index">Go to Encryption Page</a>
-</div>
-
-<script>
-let images = [
-    "/images/cassia.webp",
-    "/images/images.jpeg",
-    "/images/Supreme_Sunny.webp"
-];
-
-let index = 0;
-let slide = document.getElementById("slide");
-
-function showNextImage() {
-    slide.classList.remove("visible");
-    setTimeout(() => {
-        index = (index + 1) % images.length;
-        slide.src = images[index];
-        slide.classList.add("visible");
-    }, 300);
-}
-
-function showPrevImage() {
-    slide.classList.remove("visible");
-    setTimeout(() => {
-        index = (index - 1 + images.length) % images.length;
-        slide.src = images[index];
-        slide.classList.add("visible");
-    }, 300);
-}
-
-function nextImage() { showNextImage(); }
-function prevImage() { showPrevImage(); }
-
-function showMessage() {
-    document.getElementById("message").innerText = "Това е нашият нов учебен корпус!";
-}
-</script>
