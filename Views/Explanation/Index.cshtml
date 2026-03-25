@@ -1,0 +1,226 @@
+@{
+    ViewData["Title"] = "";
+    ViewData["Page"] = "explain";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page exp-page">
+
+    <h1 class="exp-title">КАК РАБОТИ <span>АЛГОРИТЪМЪТ</span></h1>
+
+    <div class="exp-section">
+        <div class="exp-text">
+            Това е <strong>персонализиран шифър</strong>, който трансформира текста чрез 
+            <strong>различни таблици</strong> (наречени "дневници"). 
+            Паролата определя кои дневници се използват и в какъв ред.
+        </div>
+    </div>
+
+    <!-- Стъпка 1 -->
+    <div class="exp-step">
+        <div class="exp-step-num">01</div>
+        <div class="exp-step-content">
+            <h3>ПАРОЛА → ОФСЕТ</h3>
+            <p>Специалните символи в паролата задават начално число, което влияе върху избора на дневници.</p>
+        </div>
+    </div>
+
+    <!-- Стъпка 2 -->
+    <div class="exp-step">
+        <div class="exp-step-num">02</div>
+        <div class="exp-step-content">
+            <h3>ПОСЛЕДОВАТЕЛНОСТ ОТ ДНЕВНИЦИ</h3>
+            <p>Всяка буква от паролата избира един от дневниците. Буквите и цифрите в паролата променят избора динамично.</p>
+        </div>
+    </div>
+
+    <!-- Стъпка 3 -->
+    <div class="exp-step">
+        <div class="exp-step-num">03</div>
+        <div class="exp-step-content">
+            <h3>ЗАМЯНА НА СИМВОЛИ</h3>
+            <p>Първите проходи заменят всяка буква с друга според текущия дневник.</p>
+        </div>
+    </div>
+
+    <!-- Стъпка 4 -->
+    <div class="exp-step">
+        <div class="exp-step-num">04</div>
+        <div class="exp-step-content">
+            <h3>ГРУПОВО ПРЕОБРАЗУВАНЕ</h3>
+            <p>Последният проход трансформира всяка буква в <strong>група от няколко символа</strong>. Групата зависи не само от буквата, но и от нейната позиция в текста.</p>
+        </div>
+    </div>
+
+    <!-- Стъпка 5 -->
+    <div class="exp-step">
+        <div class="exp-step-num">05</div>
+        <div class="exp-step-content">
+            <h3>РАЗДЕЛИТЕЛИ И ШУМ</h3>
+            <p>Между групите се вмъкват разделители и случайни символи от различни писмености, които при декриптиране се игнорират.</p>
+        </div>
+    </div>
+
+    <!-- Стъпка 6 -->
+    <div class="exp-step">
+        <div class="exp-step-num">06</div>
+        <div class="exp-step-content">
+            <h3>ЦИФРИТЕ</h3>
+            <p>Цифрите в текста се обработват отделно — те се разбъркват и след това се връщат в оригиналния си вид.</p>
+        </div>
+    </div>
+
+    <!-- ПРИМЕР С ОФСЕТ -->
+    <div class="exp-section">
+        <div class="exp-section-title">ПРИМЕР — ОФСЕТ</div>
+        <div class="exp-box" style="padding: 0; overflow: hidden;">
+            
+            <!-- Вход -->
+            <div style="padding: 20px 24px; background: var(--surface2); border-bottom: 1px solid var(--border);">
+                <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center;">
+                    <div style="background: var(--red); padding: 4px 12px; border-radius: 20px; font-size: 11px;">ПАРОЛА</div>
+                    <div style="font-family: var(--mono); font-size: 18px; color: var(--red);">небеса#2024</div>
+                </div>
+            </div>
+
+            <!-- Таблица с изчисление на офсет -->
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--border);">
+                <div style="color: var(--red); font-size: 12px; margin-bottom: 12px;">📊 Стъпка 1: Специални символи → двоично число</div>
+                <table style="width: 100%; font-family: var(--mono); font-size: 12px; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <th style="padding: 8px; text-align: left;">Символ</th>
+                            <th style="padding: 8px; text-align: left;">Специален?</th>
+                            <th style="padding: 8px; text-align: left;">Бит</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td style="padding: 6px 8px;">н,е,б,е,с,а</td><td>❌</td><td>0</td></tr>
+                        <tr><td style="padding: 6px 8px; color: var(--red);">#</td><td>✅</td><td style="color: var(--red);">1</td></tr>
+                        <tr><td style="padding: 6px 8px;">2,0,2,4</td><td>❌</td><td>0</td></tr>
+                    </tbody>
+                </table>
+                <div style="margin-top: 16px; padding: 12px; background: var(--surface); border-radius: 8px; font-family: var(--mono);">
+                    Двоично: <strong>0000001 0000</strong> → <strong style="color: var(--red);">10000₂</strong> = <strong style="color: var(--red);">16</strong><br/>
+                    <span style="color: var(--text-muted); font-size: 11px;">Офсет = 16 % 30 = 16</span>
+                </div>
+            </div>
+
+            <!-- Таблица с избор на дневници -->
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--border);">
+                <div style="color: var(--red); font-size: 12px; margin-bottom: 12px;">📖 Стъпка 2: Офсетът избира дневници</div>
+                <table style="width: 100%; font-family: var(--mono); font-size: 12px; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <th style="padding: 8px; text-align: left;">Буква</th>
+                            <th style="padding: 8px; text-align: left;">Позиция</th>
+                            <th style="padding: 8px; text-align: left;">Изчисление</th>
+                            <th style="padding: 8px; text-align: left;">Дневник</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>н</td><td>13</td><td>(13+16)%30</td><td style="color: var(--red);">29</td></tr>
+                        <tr><td>е</td><td>5</td><td>(5+16)%30</td><td style="color: var(--red);">21</td></tr>
+                        <tr><td>б</td><td>1</td><td>(1+16)%30</td><td style="color: var(--red);">17</td></tr>
+                        <tr><td>е</td><td>5</td><td>(5+16)%30</td><td style="color: var(--red);">21</td></tr>
+                        <tr><td>с</td><td>17</td><td>(17+16)%30</td><td style="color: var(--red);">3</td></tr>
+                        <tr><td>а</td><td>0</td><td>(0+16)%30</td><td style="color: var(--red);">16</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Динамичен офсет от цифри -->
+            <div style="padding: 20px 24px; border-bottom: 1px solid var(--border);">
+                <div style="color: var(--red); font-size: 12px; margin-bottom: 12px;">🔢 Стъпка 3: Цифрите увеличават офсета</div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; font-family: var(--mono); font-size: 13px;">
+                    <span>16</span>
+                    <span style="color: var(--red);">+2 → 18</span>
+                    <span style="color: var(--red);">+0 → 18</span>
+                    <span style="color: var(--red);">+2 → 20</span>
+                    <span style="color: var(--red);">+4 → 24</span>
+                </div>
+                <div style="margin-top: 12px; padding: 8px 12px; background: var(--surface); border-radius: 8px; font-size: 12px;">
+                    Краен офсет след паролата: <strong style="color: var(--red);">24</strong>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ПРИМЕР С БУКВА "Т" -->
+    <div class="exp-section">
+        <div class="exp-section-title">ПРИМЕР — ТРАНСФОРМАЦИЯ НА БУКВА</div>
+        <div class="exp-box" style="padding: 0; overflow: hidden;">
+            
+            <div style="padding: 16px 24px; background: var(--surface2); border-bottom: 1px solid var(--border); text-align: center;">
+                <span style="font-family: var(--mono); font-size: 28px; color: var(--text);">Т</span>
+                <span style="color: var(--text-muted); margin: 0 12px;">→</span>
+                <span style="font-family: var(--mono); font-size: 28px; color: var(--red);">щзъ#か</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 20px;">
+                <div style="text-align: center; padding: 12px; background: var(--surface); border-radius: 8px;">
+                    <div style="color: var(--red); font-size: 11px;">СЛОЙ 1</div>
+                    <div style="font-size: 12px;">Офсет</div>
+                    <div style="font-family: var(--mono); font-size: 18px; color: var(--red);">16</div>
+                </div>
+                <div style="text-align: center; padding: 12px; background: var(--surface); border-radius: 8px;">
+                    <div style="color: var(--red); font-size: 11px;">СЛОЙ 2</div>
+                    <div style="font-size: 12px;">Дневник</div>
+                    <div style="font-family: var(--mono); font-size: 18px; color: var(--red);">4</div>
+                </div>
+                <div style="text-align: center; padding: 12px; background: var(--surface); border-radius: 8px;">
+                    <div style="color: var(--red); font-size: 11px;">СЛОЙ 3</div>
+                    <div style="font-size: 12px;">Замяна</div>
+                    <div style="font-family: var(--mono); font-size: 18px; color: var(--red);">Щ</div>
+                </div>
+                <div style="text-align: center; padding: 12px; background: var(--surface); border-radius: 8px;">
+                    <div style="color: var(--red); font-size: 11px;">СЛОЙ 4</div>
+                    <div style="font-size: 12px;">Групиране</div>
+                    <div style="font-family: var(--mono); font-size: 14px; color: var(--red);">щзъ</div>
+                </div>
+                <div style="text-align: center; padding: 12px; background: var(--surface); border-radius: 8px;">
+                    <div style="color: var(--red); font-size: 11px;">СЛОЙ 5</div>
+                    <div style="font-size: 12px;">Шум</div>
+                    <div style="font-family: var(--mono); font-size: 14px; color: var(--red);">#か</div>
+                </div>
+            </div>
+
+            <div style="padding: 12px 24px; background: var(--surface2); border-top: 1px solid var(--border); font-size: 11px; color: var(--text-muted); text-align: center;">
+                Всяка буква преминава през 5-те слоя трансформация
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ПЪЛЕН ПРИМЕР -->
+    <div class="exp-section">
+        <div class="exp-section-title">ПЪЛЕН ПРИМЕР</div>
+        <div class="exp-box" style="padding: 0; overflow: hidden;">
+            
+            <div style="padding: 20px 24px; background: var(--surface2); border-bottom: 1px solid var(--border);">
+                <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center;">
+                    <div style="background: var(--red); padding: 4px 12px; border-radius: 20px; font-size: 11px;">ОРИГИНАЛ</div>
+                    <div style="font-family: var(--mono); font-size: 18px; color: var(--text);">ТЪМНА ЗВЕЗДА</div>
+                    <div style="color: var(--text-muted);">🔑</div>
+                    <div style="font-family: var(--mono); font-size: 14px; color: var(--red);">небеса#2024</div>
+                </div>
+            </div>
+
+            <div style="padding: 20px 24px;">
+                <div style="background: var(--surface); padding: 20px; border-radius: 12px; border-left: 3px solid var(--red);">
+                    <div style="color: var(--text-muted); font-size: 11px; margin-bottom: 8px;">КРИПТИРАН РЕЗУЛТАТ</div>
+                    <div style="font-family: var(--mono); font-size: 12px; color: var(--red); word-break: break-all; line-height: 1.6;">
+                        @Html.Raw("щзъ#かжсе§¢‡こまб§〄じвбх@✧цкюю¶₪μмню€")
+                    </div>
+                </div>
+            </div>
+
+            <div style="padding: 12px 24px; background: var(--surface2); border-top: 1px solid var(--border); font-size: 11px; color: var(--text-muted); text-align: center;">
+                Офсет 16 от "#" → цифрите 2,0,2,4 увеличават офсета до 24 → 5 слоя трансформация
+            </div>
+
+        </div>
+    </div>
+
+</div>

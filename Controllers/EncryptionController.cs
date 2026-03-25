@@ -12,7 +12,7 @@ public class EncryptionController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Index(string inputText, bool decryptMode, IFormFile? uploadFile)
+    public async Task<IActionResult> Index(string inputText, bool decryptMode, IFormFile? uploadFile, string password = "ав")
     {
         var model = new EncryptionViewModel();
 
@@ -35,16 +35,13 @@ public class EncryptionController : Controller
             }
 
             var cipher = new CustomCipher();
-
             if (decryptMode)
             {
-                model.DecryptedText = cipher.Decrypt(model.OriginalText);
-                model.EncryptedText = cipher.Encrypt(model.DecryptedText);
+                model.DecryptedText = cipher.Decrypt(model.OriginalText, password);
             }
             else
             {
-                model.EncryptedText = cipher.Encrypt(model.OriginalText);
-                model.DecryptedText = cipher.Decrypt(model.EncryptedText);
+                model.EncryptedText = cipher.Encrypt(model.OriginalText, password);
             }
         }
         catch (Exception ex)
