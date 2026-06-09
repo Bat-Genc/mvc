@@ -35,8 +35,8 @@ public class HomeController : Controller
             }
 
             var cipher = new CustomCipher();
-            model.EncryptedText = cipher.Encrypt(model.OriginalText);
-            model.DecryptedText = cipher.Decrypt(model.EncryptedText);
+            model.EncryptedText = cipher.EncryptWithDate(model.OriginalText, "ав", DateTime.UtcNow.AddHours(2));
+            model.DecryptedText = cipher.DecryptWithDate(model.EncryptedText, "ав", DateTime.UtcNow.AddHours(2));
         }
         catch (Exception ex)
         {

@@ -1,0 +1,49 @@
+@{
+    ViewData["Title"] = "Добавяне на метод за криптиране";
+}
+
+<div class="page">
+    <div style="max-width: 500px; margin: 0 auto;">
+        <h1 style="color: var(--red);">➕ ДОБАВЯНЕ НА МЕТОД</h1>
+        
+        <form method="post">
+            <div style="margin-bottom: 15px;">
+                <label>Име на метода:</label>
+                <input type="text" name="methodName" required 
+                       style="width: 100%; padding: 8px; background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label>Custom Seed (число):</label>
+                <input type="number" name="customSeed" required 
+                       style="width: 100%; padding: 8px; background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+                <small style="color: var(--text-muted);">Определя уникалната последователност от дневници</small>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label>Custom Password (задължителна):</label>
+                <input type="text" name="customPassword" required 
+                       style="width: 100%; padding: 8px; background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+                <small style="color: var(--text-muted);">Лична парола за този метод</small>
+            </div>
+            
+            <!-- НОВИ ПОЛЕТА -->
+            <div style="margin-bottom: 15px;">
+                <label>Парола по подразбиране (остави празно за ръчно въвеждане):</label>
+                <input type="text" name="defaultPassword" 
+                       style="width: 100%; padding: 8px; background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+                <small style="color: var(--text-muted);">Ако попълните, ще се използва автоматично</small>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label>Получател по подразбиране (остави "everyone" за всички):</label>
+                <input type="text" name="defaultTargetUsername" value="everyone"
+                       style="width: 100%; padding: 8px; background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+                <small style="color: var(--text-muted);">Кой може да декриптира</small>
+            </div>
+            
+            <button type="submit" style="background: var(--red); color: white; padding: 10px 20px;">ДОБАВИ</button>
+            <a href="/Account/Profile" style="margin-left: 10px;">Назад</a>
+        </form>
+    </div>
+</div>

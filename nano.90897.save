@@ -1,0 +1,204 @@
+et build
+ dotnet build -v minimal
+ dotnet build > /tmp/schoolmvc_build_output.txt 2>&1; echo EXIT:$?; tail -n 50 /tmp/schoolmvc_build_output.txt
+ dotnet build -v minimal
+ dotnet build -v minimal > /tmp/build_out.txt 2>&1; echo EXIT:$?; tail -n 60 /tmp/build_out.txt
+ cd /home/oni/Disc_D/SchoolMvc && python3 - <<'PY'
+from datetime import datetime
+import random
+Alphabet = [c for c in 'абвгдежзийклмнопрстуфхцчшщъьюя']
+Preserved = set(['.', ',', '?', '!', ':', ';', '"', "'", '(', ')', '\n', '-'])
+Separators = ['@','#','$','%','^','&','*','~','|','/','\\','+','=','<','>','§','°','†','‡','€','£','¥','¤','¦','±','×','÷','¬','µ','¶','¿','¡','™','©','®','[',']','{','}','_']
+Noise = list(''.join(['ابتثجحخدرزسشصضطظعغب的一是在不了有和人这中大为何上个国我以要他あいうえおかきくけこさしすせそたちつてと가나다라마바사아자차카타파하갈남대람봐삶กขคงจฉชซญดตถทนนบปผฝพฟմասնիկհետրբգդզթլծպռվაბგდევზთიკლმნოპჟრსტუ']))
+NoiseSet = set(Noise)
+
+
+def is_password_special(c): return not c.isalpha() and not c.isdigit()
+def alphabet_index(c):
+    t = c.lower()
+    return Alphabet.index(t) if t in Alphabet else -1
+
+def compute_daily_seed_offset(date):
+    return (date.year * 365 + date.timetuple().tm_yday) % 30
+
+def generate_simple_map(date):
+    dailyOffset = compute_daily_seed_offset(date)
+    baseSeeds = [42,84,126,168,210,252,294,336,378,420,462,504,546,588,630,672,714,756,798,840,882,924,966,1008,1050,1092,1134,1176,1218,1260]
+    map_=[]
+    for n in range(30):
+        dailySeed = baseSeeds[n] + dailyOffset
+        rng = random.Random(dailySeed)
+        perm = Alphabet[:]
+        for i in range(len(perm)-1,0,-1):
+            j = rng.randrange(i+1)
+            perm[i],perm[j]=perm[j],perm[i]
+        map_.append(perm)
+    return map_
+
+def generate_simple_map_reverse(date):
+    m=generate_simple_map(date)
+    reverse=[]
+    for n in range(30):
+        rev=['']*30
+        for i,ch in enumerate(m[n]):
+            rev[Alphabet.index(ch)] = Alphabet[i]
+        reverse.append(rev)
+    return reverse
+
+def build_sequence(password):
+    bits=[]
+    for c in password:
+        bits.append('1' if is_password_special(c) else '0')
+    bitStr=''.join(bits).lstrip('0')
+    if len(bitStr)==0: return []
+    if len(bitStr)>30: bitStr=bitStr[-30:]
+    offset=int(bitStr,2)%30
+    seq=[]
+    for c in password:
+        if is_password_special(c): continue
+        if c.isdigit():
+            offset=(offset + (ord(c)-48))%30
+            continue
+        idx=alphabet_index(c)
+        if idx<0: continue
+        seq.append((idx+offset)%30)
+    return seq
+
+def apply_group_encrypt(text, nbIdx):
+    notebook = notebooks[nbIdx]
+    rng = random.Random(nbIdx*1337)
+    digitBuf=[]
+    out=[]
+    charPos=0
+    def flush_digits():
+        nonlocal digitBuf
+        if digitBuf:
+            d=''.join(digitBuf)
+            if len(d)<=1:
+                out.append(d)
+            else:
+                if len(d)%3==0:
+                    p=len(d)//3
+                    out.append(d[p:]+d[:p])
+                else:
+                    half=len(d)//2
+                    out.append(d[half:]+d[:half])
+            digitBuf=[]
+    for c in text:
+        if c.isdigit():
+            digitBuf.append(c); continue
+        flush_digits()
+        if c in Preserved: out.append(c); continue
+        if c==' ':
+            count=rng.randrange(2,6)
+            out.extend(rng.choice(Separators) for _ in range(count))
+            continue
+        isUpper=c.isupper()
+        idx=alphabet_index(c)
+        if idx<0:
+            out.append(c); continue
+        rotatedIdx=(idx+charPos)%30
+        charPos+=1
+        group=notebook[rotatedIdx]
+        ch = group[0].upper() if isUpper else group[0]
+        out.append(ch)
+        out.append(group[1:])
+        out.append(rng.choice(Separators))
+        for _ in range(rng.randrange(1,3)): out.append(rng.choice(Noise))
+    flush_digits()
+    return ''.join(out)
+
+def apply_char_encrypt(text, nbIdx, simpleMap):
+    m=simpleMap[nbIdx]
+    out=[]
+    for c in text:
+        if alphabet_index(c)<0: out.append(c); continue
+        out.append(m[alphabet_index(c)].upper() if c.isupper() else m[alphabet_index(c)])
+    return ''.join(out)
+
+def apply_group_decrypt(text, nbIdx, notebooks):
+    notebook=notebooks[nbIdx]
+    groupLen=(nbIdx%4)+2
+    out=[]
+    i=0
+    charPos=0
+    while i < len(text):
+        c=text[i]
+        if c in Preserved:
+            out.append(c); i+=1; continue
+        if c in NoiseSet:
+            i+=1; continue
+        if c in Separators:
+            count=0
+            while i<len(text) and text[i] in Separators:
+                count+=1; i+=1
+            if count>=2: out.append(' ')
+            continue
+        if c.isdigit():
+            digits=[]
+            while i<len(text) and text[i].isdigit(): digits.append(text[i]); i+=1
+            d=''.join(digits)
+            if len(d)<=1: out.append(d)
+            else:
+                if len(d)%3==0:
+                    p=len(d)//3; out.append(d[-p:]+d[:-p])
+                else:
+                    half=len(d)//2; sec=len(d)-half; out.append(d[sec:]+d[:sec])
+            continue
+        if alphabet_index(c)>=0:
+            isUpper=c.isupper()
+            groupChars=[]
+            read=0
+            while i<len(text) and read<groupLen:
+                gc=text[i]
+                if gc not in Separators and gc not in Preserved and not gc.isdigit() and gc not in NoiseSet:
+                    groupChars.append(gc.lower()); read+=1
+                i+=1
+            groupStr=''.join(groupChars)
+            found=-1
+            for k in range(30):
+                if notebooks[k][k2] if False else False: pass
+            # fix below
+            for k in range(30):
+                if notebooks[k][0] and False: pass
+            # we'll implement proper search differently
+            # Eh easier to use same loop in Python after constructing note
+            # Actually just use per group search
+            found=-1
+            for k in range(30):
+                if notebooks[k].count(groupStr):
+                    pass
+            # Not trivial, skip. just test date offset function separately.
+            break
+    return ''.join(out)
+
+# Because the decrypt group logic is difficult to port exactly here, just test the daily offset function behavior.
+for d in [datetime(2026,5,1), datetime(2026,5,2), datetime(2026,5,31), datetime(2026,6,1), datetime(2026,7,1)]:
+    print(d.date(), compute_daily_seed_offset(d))
+PY
+ echo hello
+ dotnet build
+ dotnet build
+ dotnet build
+ dotnet build
+ dotnet build
+ dotnet build
+ dotnet build 2>&1 | cat
+ echo OK
+ dotnet build
+ dotnet build
+ dotnet build
+ dotnet ef migrations add AddCustomPasswordAndDecryptionKey
+ dotnet ef database update
+ dotnet build
+ dotnet ef database update
+ pkill -f "dotnet watch"
+ dotnet ef database update
+ which dotnet
+ ls -la /usr/bin/dotnet
+ dotnet ef migrations add AddDefaultFieldsToUserEncryptionMethods
+ dotnet ef database update
+ dotnet ef migrations add AddCustomPasswordAndDecryptionKey
+ dotnet build SchoolMvc.csproj
+ echo test
+

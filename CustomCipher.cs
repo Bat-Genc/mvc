@@ -1,4 +1,7 @@
-﻿namespace SchoolMvc;
+﻿using System.Security.Cryptography;
+using System.Text;
+
+namespace SchoolMvc;
 
 public class CustomCipher
 {
@@ -23,48 +26,56 @@ public class CustomCipher
 
     private static readonly HashSet<char> SeparatorSet = new(Separators);
 
-    // ================================================================
-    // СПИСЪК 3 — шум (екзотични символи, игнорират се при декриптиране)
-    // ================================================================
     private static readonly char[] Noise =
     {
-        // Арабски
         'ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف',
-        // Китайски
         '的','一','是','在','不','了','有','和','人','这','中','大','为','上','个','国','我','以','要','他',
-        // Японски
         'あ','い','う','え','お','か','き','く','け','こ','さ','し','す','せ','そ','た','ち','つ','て','と',
-        // Корейски
         '가','나','다','라','마','바','사','아','자','차','카','타','파','하','갈','남','대','람','봐','삶',
-        // Тайски
         'ก','ข','ค','ง','จ','ฉ','ช','ซ','ญ','ด','ต','ถ','ท','น','บ','ป','ผ','ฝ','พ','ฟ',
-        // Арменски
         'մ','ա','ս','ն','ի','կ','հ','ե','տ','ր','բ','գ','դ','զ','թ','լ','ծ','պ','ռ','վ',
-        // Грузински
         'ა','ბ','გ','დ','ე','ვ','ზ','თ','ი','კ','ლ','მ','ნ','ო','პ','ჟ','რ','ს','ტ','უ'
     };
 
     private static readonly HashSet<char> NoiseSet = new(Noise);
 
-    private static readonly string[][] Notebooks = GenerateNotebooks();
-
-    private static string[][] GenerateNotebooks()
+    public static string GenerateCustomPasswordForUsername(string username)
     {
-        int[] seeds =
+        if (string.IsNullOrWhiteSpace(username))
         {
-            101,202,303,404,505,606,707,808,909,1010,
-            1111,1212,1313,1414,1515,1616,1717,1818,1919,2020,
-            2121,2222,2323,2424,2525,2626,2727,2828,2929,3030
-        };
+            return string.Empty;
+        }
+
+        var normalized = username.Trim().ToLowerInvariant();
+        var bytes = Encoding.UTF8.GetBytes("CipherX-User:" + normalized);
+        var hash = SHA256.HashData(bytes);
+        return Convert.ToHexString(hash).Substring(0, 16);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // ВРЕМЕВА ЗАВИСИМОСТ - дневни seed-ове
+    // ═══════════════════════════════════════════════════════════════════════════
+    public static int GetDailySeedOffset(DateTime date)
+    {
+        // Променя се ВСЕКИ ДЕН - зависи от датата
+        return date.Year * 10000 + date.Month * 100 + date.Day;
+    }
+
+    private static string[][] GenerateNotebooksForDate(DateTime date)
+    {
+        var dailyOffset = GetDailySeedOffset(date);
+        int[] baseSeeds = { 101,202,303,404,505,606,707,808,909,1010,
+                            1111,1212,1313,1414,1515,1616,1717,1818,1919,2020,
+                            2121,2222,2323,2424,2525,2626,2727,2828,2929,3030 };
 
         var notebooks = new string[30][];
         for (int n = 0; n < 30; n++)
         {
-            var rng = new Random(seeds[n]);
+            var dailySeed = baseSeeds[n] + dailyOffset;
+            var rng = new Random(dailySeed);
             int groupLen = (n % 4) + 2;
             notebooks[n] = new string[30];
             var used = new HashSet<string>();
-
             for (int i = 0; i < 30; i++)
             {
                 string group;
@@ -78,7 +89,6 @@ public class CustomCipher
                     attempts++;
                     if (attempts > 50000) break;
                 } while (used.Contains(group));
-
                 used.Add(group);
                 notebooks[n][i] = group;
             }
@@ -86,43 +96,106 @@ public class CustomCipher
         return notebooks;
     }
 
-    private static readonly char[][] SimpleMap;
-    private static readonly char[][] SimpleMapReverse;
-
-    static CustomCipher()
+    private static char[][] GenerateSimpleMapForDate(DateTime date)
     {
-        int[] seeds =
-        {
-             42, 84,126,168,210,252,294,336,378,420,
-            462,504,546,588,630,672,714,756,798,840,
-            882,924,966,1008,1050,1092,1134,1176,1218,1260
-        };
-
-        SimpleMap = new char[30][];
-        SimpleMapReverse = new char[30][];
-
+        var dailyOffset = GetDailySeedOffset(date);
+        int[] baseSeeds = { 42,84,126,168,210,252,294,336,378,420,
+                            462,504,546,588,630,672,714,756,798,840,
+                            882,924,966,1008,1050,1092,1134,1176,1218,1260 };
+        
+        var map = new char[30][];
         for (int n = 0; n < 30; n++)
         {
+            var dailySeed = baseSeeds[n] + dailyOffset;
             var perm = (char[])Alphabet.Clone();
-            var rng = new Random(seeds[n]);
+            var rng = new Random(dailySeed);
             for (int i = perm.Length - 1; i > 0; i--)
             {
                 int j = rng.Next(i + 1);
                 (perm[i], perm[j]) = (perm[j], perm[i]);
             }
-            SimpleMap[n] = perm;
-
-            SimpleMapReverse[n] = new char[30];
-            for (int i = 0; i < 30; i++)
-                SimpleMapReverse[n][Array.IndexOf(Alphabet, perm[i])] = Alphabet[i];
+            map[n] = perm;
         }
+        return map;
     }
 
-    private static bool IsPasswordSpecial(char c) =>
-        !char.IsLetter(c) && !char.IsDigit(c);
+    private static char[][] GenerateSimpleMapReverseForDate(DateTime date)
+    {
+        var map = GenerateSimpleMapForDate(date);
+        var reverseMap = new char[30][];
+        for (int n = 0; n < 30; n++)
+        {
+            reverseMap[n] = new char[30];
+            for (int i = 0; i < 30; i++)
+                reverseMap[n][Array.IndexOf(Alphabet, map[n][i])] = Alphabet[i];
+        }
+        return reverseMap;
+    }
 
-    private static int AlphabetIndex(char c) =>
-        Array.IndexOf(Alphabet, char.ToLower(c));
+    // ═══════════════════════════════════════════════════════════════════════════
+    // ОСНОВЕН МЕТОД ЗА КРИПТИРАНЕ С ДАТА
+    // ═══════════════════════════════════════════════════════════════════════════
+    public string EncryptWithDate(string text, string password, DateTime date)
+{
+    Console.WriteLine($"=== EncryptWithDate ===");
+    Console.WriteLine($"text: {text}");
+    Console.WriteLine($"password: {password}");
+    Console.WriteLine($"date: {date:yyyy-MM-dd}");
+    
+    var notebooks = GenerateNotebooksForDate(date);
+    var simpleMap = GenerateSimpleMapForDate(date);
+    var simpleMapReverse = GenerateSimpleMapReverseForDate(date);
+    
+    Console.WriteLine($"Notebooks[0][0]: '{notebooks[0][0]}'");
+    Console.WriteLine($"SimpleMap[0][0]: '{simpleMap[0][0]}'");
+    
+    if (string.IsNullOrEmpty(text)) return text;
+    var sequence = BuildSequence(password);
+    Console.WriteLine($"Sequence: [{string.Join(", ", sequence)}]");
+    
+    if (sequence.Count == 0) return text;
+    
+    string current = text;
+    for (int s = 0; s < sequence.Count; s++)
+    {
+        Console.WriteLine($"Step {s}, current before: '{current}'");
+        current = s == sequence.Count - 1 
+            ? ApplyGroupEncryptWithData(current, sequence[s], notebooks) 
+            : ApplyCharEncryptWithData(current, sequence[s], simpleMap);
+        Console.WriteLine($"Step {s}, current after: '{current}'");
+    }
+    Console.WriteLine($"=== EncryptWithDate RESULT: '{current}'");
+    return current;
+}
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // ОСНОВЕН МЕТОД ЗА ДЕКРИПТИРАНЕ С ДАТА
+    // ═══════════════════════════════════════════════════════════════════════════
+    public string DecryptWithDate(string text, string password, DateTime date)
+    {
+        var notebooks = GenerateNotebooksForDate(date);
+        var simpleMapReverse = GenerateSimpleMapReverseForDate(date);
+        
+        if (string.IsNullOrEmpty(text)) return text;
+        var sequence = BuildSequence(password);
+        if (sequence.Count == 0) return text;
+        sequence.Reverse();
+        
+        string current = text;
+        for (int s = 0; s < sequence.Count; s++)
+        {
+            current = s == 0 
+                ? ApplyGroupDecryptWithData(current, sequence[s], notebooks) 
+                : ApplyCharDecryptWithData(current, sequence[s], simpleMapReverse);
+        }
+        return current;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // ПОМОЩНИ МЕТОДИ
+    // ═══════════════════════════════════════════════════════════════════════════
+    private static bool IsPasswordSpecial(char c) => !char.IsLetter(c) && !char.IsDigit(c);
+    private static int AlphabetIndex(char c) => Array.IndexOf(Alphabet, char.ToLower(c));
 
     private static string TransformDigits(string d)
     {
@@ -163,48 +236,20 @@ public class CustomCipher
             if (IsPasswordSpecial(c)) continue;
             if (char.IsDigit(c)) { offset = (offset + (c - '0')) % 30; continue; }
             int baseIdx = AlphabetIndex(c);
-            if (baseIdx < 0) continue;
+            if (baseIdx < 0)
+            {
+                // Non-Cyrillic username/password characters must still affect encryption.
+                sequence.Add((c % 30 + offset) % 30);
+                continue;
+            }
             sequence.Add((baseIdx + offset) % 30);
         }
         return sequence;
     }
 
-    public string Encrypt(string text, string password = "ав")
+    private static string ApplyCharEncryptWithData(string text, int nbIdx, char[][] simpleMap)
     {
-        if (string.IsNullOrEmpty(text)) return text;
-        var sequence = BuildSequence(password);
-        if (sequence.Count == 0) return text;
-
-        string current = text;
-        for (int s = 0; s < sequence.Count; s++)
-        {
-            current = s == sequence.Count - 1
-                ? ApplyGroupEncrypt(current, sequence[s])
-                : ApplyCharEncrypt(current, sequence[s]);
-        }
-        return current;
-    }
-
-    public string Decrypt(string text, string password = "ав")
-    {
-        if (string.IsNullOrEmpty(text)) return text;
-        var sequence = BuildSequence(password);
-        if (sequence.Count == 0) return text;
-
-        sequence.Reverse();
-        string current = text;
-        for (int s = 0; s < sequence.Count; s++)
-        {
-            current = s == 0
-                ? ApplyGroupDecrypt(current, sequence[s])
-                : ApplyCharDecrypt(current, sequence[s]);
-        }
-        return current;
-    }
-
-    private static string ApplyCharEncrypt(string text, int nbIdx)
-    {
-        var map = SimpleMap[nbIdx];
+        var map = simpleMap[nbIdx];
         var sb = new System.Text.StringBuilder(text.Length);
         foreach (char c in text)
         {
@@ -216,9 +261,9 @@ public class CustomCipher
         return sb.ToString();
     }
 
-    private static string ApplyCharDecrypt(string text, int nbIdx)
+    private static string ApplyCharDecryptWithData(string text, int nbIdx, char[][] simpleMapReverse)
     {
-        var map = SimpleMapReverse[nbIdx];
+        var map = simpleMapReverse[nbIdx];
         var sb = new System.Text.StringBuilder(text.Length);
         foreach (char c in text)
         {
@@ -230,78 +275,53 @@ public class CustomCipher
         return sb.ToString();
     }
 
-    private static string ApplyGroupEncrypt(string text, int nbIdx)
+    private static string ApplyGroupEncryptWithData(string text, int nbIdx, string[][] notebooks)
     {
-        var notebook = Notebooks[nbIdx];
+        var notebook = notebooks[nbIdx];
         var sb = new System.Text.StringBuilder();
         var rng = new Random(nbIdx * 1337);
         var digitBuf = new System.Text.StringBuilder();
         int charPos = 0;
-
-        void FlushDigits()
-        {
-            if (digitBuf.Length == 0) return;
-            sb.Append(TransformDigits(digitBuf.ToString()));
-            digitBuf.Clear();
-        }
-
+        void FlushDigits() { if (digitBuf.Length == 0) return; sb.Append(TransformDigits(digitBuf.ToString())); digitBuf.Clear(); }
         foreach (char c in text)
         {
             if (char.IsDigit(c)) { digitBuf.Append(c); continue; }
             FlushDigits();
-
             if (Preserved.Contains(c)) { sb.Append(c); continue; }
-
             if (c == ' ')
             {
                 int count = rng.Next(2, 6);
-                for (int i = 0; i < count; i++)
-                    sb.Append(Separators[rng.Next(Separators.Length)]);
+                for (int i = 0; i < count; i++) sb.Append(Separators[rng.Next(Separators.Length)]);
                 continue;
             }
-
             bool isUpper = char.IsUpper(c);
             int idx = AlphabetIndex(c);
             if (idx < 0) { sb.Append(c); continue; }
-
             int rotatedIdx = (idx + charPos) % 30;
             charPos++;
-
             string group = notebook[rotatedIdx];
             sb.Append(isUpper ? char.ToUpper(group[0]) : group[0]);
-            for (int k = 1; k < group.Length; k++)
-                sb.Append(group[k]);
-
-            // Разделител
+            for (int k = 1; k < group.Length; k++) sb.Append(group[k]);
             sb.Append(Separators[rng.Next(Separators.Length)]);
-
-            // Шум — 1-2 екзотични символа след всяка група
             int noiseCount = rng.Next(1, 3);
-            for (int n = 0; n < noiseCount; n++)
-                sb.Append(Noise[rng.Next(Noise.Length)]);
+            for (int n = 0; n < noiseCount; n++) sb.Append(Noise[rng.Next(Noise.Length)]);
         }
-
         FlushDigits();
         return sb.ToString();
     }
 
-    private static string ApplyGroupDecrypt(string text, int nbIdx)
+    private static string ApplyGroupDecryptWithData(string text, int nbIdx, string[][] notebooks)
     {
-        var notebook = Notebooks[nbIdx];
+        var notebook = notebooks[nbIdx];
         int groupLen = (nbIdx % 4) + 2;
         var sb = new System.Text.StringBuilder();
         int i = 0;
         int charPos = 0;
-
         while (i < text.Length)
         {
             char c = text[i];
-
             if (Preserved.Contains(c)) { sb.Append(c); i++; continue; }
-
-            // Шум от Списък 3 — игнорираме напълно
             if (NoiseSet.Contains(c)) { i++; continue; }
-
             if (SeparatorSet.Contains(c))
             {
                 int count = 0;
@@ -309,39 +329,31 @@ public class CustomCipher
                 if (count >= 2) sb.Append(' ');
                 continue;
             }
-
             if (char.IsDigit(c))
             {
                 var digits = new System.Text.StringBuilder();
-                while (i < text.Length && char.IsDigit(text[i]))
-                    digits.Append(text[i++]);
+                while (i < text.Length && char.IsDigit(text[i])) digits.Append(text[i++]);
                 sb.Append(ReverseTransformDigits(digits.ToString()));
                 continue;
             }
-
             if (AlphabetIndex(c) >= 0)
             {
                 bool isUpper = char.IsUpper(c);
                 var groupChars = new System.Text.StringBuilder();
                 int read = 0;
-
                 while (i < text.Length && read < groupLen)
                 {
                     char gc = text[i];
-                    if (!SeparatorSet.Contains(gc) && !Preserved.Contains(gc)
-                        && !char.IsDigit(gc) && !NoiseSet.Contains(gc))
+                    if (!SeparatorSet.Contains(gc) && !Preserved.Contains(gc) && !char.IsDigit(gc) && !NoiseSet.Contains(gc))
                     {
                         groupChars.Append(char.ToLower(gc));
                         read++;
                     }
                     i++;
                 }
-
                 string groupStr = groupChars.ToString();
                 int found = -1;
-                for (int k = 0; k < 30; k++)
-                    if (notebook[k] == groupStr) { found = k; break; }
-
+                for (int k = 0; k < 30; k++) if (notebook[k] == groupStr) { found = k; break; }
                 if (found >= 0)
                 {
                     int idx = ((found - charPos) % 30 + 30) % 30;
@@ -350,11 +362,24 @@ public class CustomCipher
                 }
                 continue;
             }
-
             sb.Append(c);
             i++;
         }
-
         return sb.ToString();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // ЛИЧНИ МЕТОДИ С PERSONAL SEED
+    // ═══════════════════════════════════════════════════════════════════════════
+    public string EncryptWithPersonalSeed(string text, string password, int personalSeed)
+    {
+        string modifiedPassword = password + personalSeed.ToString();
+        return EncryptWithDate(text, modifiedPassword, DateTime.UtcNow.AddHours(2));
+    }
+
+    public string DecryptWithPersonalSeed(string text, string password, int personalSeed)
+    {
+        string modifiedPassword = password + personalSeed.ToString();
+        return DecryptWithDate(text, modifiedPassword, DateTime.UtcNow.AddHours(2));
     }
 }

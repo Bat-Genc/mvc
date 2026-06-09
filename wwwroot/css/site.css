@@ -625,3 +625,9 @@ input:checked ~ .switch-label { color: var(--red); }
     color: var(--text-muted);
     line-height: 1.6;
 }
+
+.nav-btn {
+    height: 50px;
+    padding: 0 20px;
+    font-size: 13px;
+}

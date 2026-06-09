@@ -1,0 +1,62 @@
+@{
+    ViewData["Title"] = "Моят профил";
+    var user = ViewBag.User as SchoolMvc.Models.AppUser;
+}
+
+<div class="page">
+    <div style="max-width: 600px; margin: 0 auto;">
+        <h1 style="color: var(--red);">👤 МОЯТ ПРОФИЛ</h1>
+        <div style="margin-bottom: 20px;">
+            <a href="/Account/MyCapsules" class="nav-btn" style="display: inline-block;">МОИ КАПСУЛИ</a>
+        </div>
+
+        <form method="post" action="/Account/UpdateProfile">
+            <div style="margin-bottom: 15px;">
+                <label>Потребителско име:</label>
+                <input type="text" name="username" value="@user?.Username" required 
+                       style="width: 100%; padding: 8px; background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label>Имейл:</label>
+                <input type="email" name="email" value="@user?.Email" required 
+                       style="width: 100%; padding: 8px; background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label>Нова парола (остави празно, ако не искаш да я сменяш):</label>
+                <input type="password" name="newPassword" 
+                       style="width: 100%; padding: 8px; background: var(--surface); border: 1px solid var(--border); color: var(--text);" />
+            </div>
+            
+            <button type="submit" style="background: var(--red); color: white; padding: 10px 20px;">ЗАПАЗИ ПРОМЕНИТЕ</button>
+            <a href="/Account/ChangePassword" style="margin-left: 10px;">Смени парола</a>
+        </form>
+        
+        <hr style="margin: 30px 0; border-color: var(--border);" />
+        
+        <h2 style="color: var(--red);">🔐 МОИТЕ МЕТОДИ ЗА КРИПТИРАНЕ</h2>
+        <a href="/Account/AddEncryptionMethod" class="nav-btn" style="display: inline-block; margin-bottom: 20px;">+ ДОБАВИ МЕТОД</a>
+        
+        <div id="methods-list">
+            @if (ViewBag.Methods != null && ((List<SchoolMvc.Models.UserEncryptionMethod>)ViewBag.Methods).Count > 0)
+            {
+                foreach (var method in ViewBag.Methods)
+                {
+                    <div style="background: var(--surface2); padding: 15px; margin-bottom: 10px; border-left: 3px solid var(--red);">
+                        <strong>@method.MethodName</strong>
+                        <div style="font-size: 12px; color: var(--text-muted);">Seed: @method.CustomSeed | Парола: @method.CustomPassword</div>
+                        <div style="margin-top: 10px;">
+                            <a href="/Account/UseEncryptionMethod?id=@method.Id" style="color: var(--red);">Използвай</a> |
+                            <a href="/Account/DeleteEncryptionMethod?id=@method.Id" onclick="return confirm('Сигурни ли сте?')">Изтрий</a>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div style="color: var(--text-muted);">Все още нямате добавени методи за криптиране.</div>
+            }
+        </div>
+    </div>
+</div>

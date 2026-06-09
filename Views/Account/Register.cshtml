@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "Регистрация";
+}
+
+<div class="page">
+    <div style="max-width: 400px; margin: 0 auto;">
+        <h1 style="color: var(--red); margin-bottom: 30px;">РЕГИСТРАЦИЯ</h1>
+        
+        @if (ViewBag.Error != null)
+        {
+            <div style="background: rgba(224,48,48,0.2); color: var(--red); padding: 12px; margin-bottom: 20px; border-left: 3px solid var(--red); border-radius: 4px;">
+                @ViewBag.Error
+            </div>
+        }
+
+        <form method="post">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: var(--text-muted);">Потребителско име:</label>
+                <input type="text" name="username" required 
+                       style="width: 100%; padding: 10px; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 4px;" />
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: var(--text-muted);">Имейл:</label>
+                <input type="email" name="email" required 
+                       style="width: 100%; padding: 10px; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 4px;" />
+            </div>
+            
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 8px; color: var(--text-muted);">Парола:</label>
+                <input type="password" name="password" required 
+                       style="width: 100%; padding: 10px; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 4px;" />
+            </div>
+            
+            <div>
+                <button type="submit" style="background: var(--red); color: white; border: none; padding: 12px 30px; cursor: pointer; font-weight: bold; border-radius: 4px;">РЕГИСТРАЦИЯ</button>
+                <a href="/Account/Login" style="margin-left: 15px; color: var(--text-muted); text-decoration: none;">Вече имате акаунт? Вход</a>
+            </div>
+        </form>
+    </div>
+</div>
