@@ -4,8 +4,6 @@ namespace SchoolMvc.Models
 {
     public class AppUser
     {
-        public string? PublicKey { get; set; }
-        public string? PrivateKey { get; set; }
         public int Id { get; set; }
         
         [Required]
@@ -29,6 +27,5 @@ namespace SchoolMvc.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         
         public ICollection<UserEncryptionMethod> EncryptionMethods { get; set; } = new List<UserEncryptionMethod>();
-        public ICollection<EncryptionHistory> Histories { get; set; } = new List<EncryptionHistory>();
     }
 }

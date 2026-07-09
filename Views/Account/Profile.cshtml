@@ -6,9 +6,18 @@
 <div class="page">
     <div style="max-width: 600px; margin: 0 auto;">
         <h1 style="color: var(--red);">👤 МОЯТ ПРОФИЛ</h1>
-        <div style="margin-bottom: 20px;">
-            <a href="/Account/MyCapsules" class="nav-btn" style="display: inline-block;">МОИ КАПСУЛИ</a>
-        </div>
+        @if (TempData["Error"] != null)
+{
+    <div style="background: rgba(224,48,48,0.2); color: var(--red); padding: 12px; margin-bottom: 20px; border-left: 3px solid var(--red); border-radius: 4px;">
+        @TempData["Error"]
+    </div>
+}
+        @if (TempData["Success"] != null)
+{
+    <div style="background: rgba(48,224,48,0.2); color: var(--green); padding: 12px; margin-bottom: 20px; border-left: 3px solid var(--green); border-radius: 4px;">
+        @TempData["Success"]
+    </div>
+}
 
         <form method="post" action="/Account/UpdateProfile">
             <div style="margin-bottom: 15px;">

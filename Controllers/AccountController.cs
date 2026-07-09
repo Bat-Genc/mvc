@@ -26,7 +26,7 @@ public class AccountController : Controller
     public async Task<IActionResult> Login(string username, string password)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
-        
+
         if (user == null || user.PasswordHash != password)
         {
             ViewBag.Error = "Грешно потребителско име или парола";
@@ -77,17 +77,7 @@ public class AccountController : Controller
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        var pendingCapsulesCount = await _context.EncryptionHistories
-            .CountAsync(h => h.TargetUsername.ToLower() == username.ToLower());
-
-        if (pendingCapsulesCount > 0)
-        {
-            TempData["PendingCapsules"] = $"Добре дошли, {username}! Имате {pendingCapsulesCount} чакащи капсули.";
-        }
-        else
-        {
-            TempData["Success"] = "Регистрацията беше успешна. Можете да влезете със своя акаунт.";
-        }
+        TempData["Success"] = "Регистрацията беше успешна. Можете да влезете със своя акаунт.";
 
         return RedirectToAction("Login");
     }
@@ -106,7 +96,7 @@ public class AccountController : Controller
         {
             return RedirectToAction("Login");
         }
-        
+
         var user = await _context.Users.FindAsync(userIdInt);
         if (user == null)
         {
@@ -114,76 +104,55 @@ public class AccountController : Controller
             return RedirectToAction("Login");
         }
         var methods = _context.UserEncryptionMethods.Where(m => m.UserId == user.Id).ToList();
-        
+
         ViewBag.User = user;
         ViewBag.Methods = methods;
         return View();
     }
 
-    [HttpGet]
-    public async Task<IActionResult> MyCapsules()
+    [HttpPost]
+public async Task<IActionResult> UpdateProfile(string username, string email, string newPassword)
+{
+    var userId = HttpContext.Session.GetString("UserId");
+    if (string.IsNullOrEmpty(userId))
     {
-        var userId = HttpContext.Session.GetString("UserId");
-        if (string.IsNullOrEmpty(userId))
-        {
-            return RedirectToAction("Login");
-        }
-
-        var user = await _context.Users.FindAsync(int.Parse(userId));
-        if (user == null)
-        {
-            return RedirectToAction("Login");
-        }
-
-        var sentCapsules = await _context.EncryptionHistories
-            .Where(h => h.UserId == user.Id)
-            .OrderByDescending(h => h.CreatedAt)
-            .Include(h => h.User)
-            .ToListAsync();
-
-        var incomingCapsules = await _context.EncryptionHistories
-            .Where(h => h.TargetUsername == user.Username && h.UserId != user.Id)
-            .OrderByDescending(h => h.CreatedAt)
-            .Include(h => h.User)
-            .ToListAsync();
-
-        var model = new MyCapsulesViewModel
-        {
-            User = user,
-            SentCapsules = sentCapsules,
-            IncomingCapsules = incomingCapsules
-        };
-
-        return View(model);
+        return RedirectToAction("Login");
     }
 
-    [HttpPost]
-    public async Task<IActionResult> UpdateProfile(string username, string email, string newPassword)
+    var user = await _context.Users.FindAsync(int.Parse(userId));
+    if (user == null)
     {
-        var userId = HttpContext.Session.GetString("UserId");
-        if (string.IsNullOrEmpty(userId))
-        {
-            return RedirectToAction("Login");
-        }
-        
-        var user = await _context.Users.FindAsync(int.Parse(userId));
-        if (user != null)
-        {
-            var oldUsername = user.Username;
-            user.Username = username;
-            user.Email = email;
-            user.CustomPassword = CustomCipher.GenerateCustomPasswordForUsername(username);
-            if (!string.IsNullOrEmpty(newPassword))
-            {
-                user.PasswordHash = newPassword;
-            }
-            await _context.SaveChangesAsync();
-            HttpContext.Session.SetString("Username", username);
-            TempData["Success"] = "Профилът беше обновен успешно!";
-        }
-        
+        return RedirectToAction("Login");
+    }
+
+    // Проверка дали новото потребителско име вече съществува (и не е текущото)
+    if (username != user.Username && await _context.Users.AnyAsync(u => u.Username == username))
+    {
+        TempData["Error"] = "Това потребителско име вече е заето!";
         return RedirectToAction("Profile");
     }
+
+    // Проверка дали новият имейл вече съществува (и не е текущият)
+    if (email != user.Email && await _context.Users.AnyAsync(u => u.Email.ToLower() == email.ToLower()))
+    {
+        TempData["Error"] = "Този имейл вече е регистриран!";
+        return RedirectToAction("Profile");
+    }
+
+    user.Username = username;
+    user.Email = email;
+    user.CustomPassword = CustomCipher.GenerateCustomPasswordForUsername(username);
+    if (!string.IsNullOrEmpty(newPassword))
+    {
+        user.PasswordHash = newPassword;
+    }
+    
+    await _context.SaveChangesAsync();
+    HttpContext.Session.SetString("Username", username);
+    TempData["Success"] = "Профилът беше обновен успешно!";
+
+    return RedirectToAction("Profile");
+}
 
     [HttpGet]
     public IActionResult AddEncryptionMethod()
@@ -192,7 +161,7 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddEncryptionMethod(string methodName, int customSeed, string customPassword, 
+    public async Task<IActionResult> AddEncryptionMethod(string methodName, int customSeed, string customPassword,
         string? defaultPassword, string? defaultTargetUsername)
     {
         var userId = HttpContext.Session.GetString("UserId");
@@ -200,7 +169,7 @@ public class AccountController : Controller
         {
             return RedirectToAction("Login");
         }
-        
+
         var method = new UserEncryptionMethod
         {
             UserId = int.Parse(userId),
@@ -212,10 +181,10 @@ public class AccountController : Controller
             DefaultPassword = string.IsNullOrWhiteSpace(defaultPassword) ? null : defaultPassword,
             DefaultTargetUsername = string.IsNullOrWhiteSpace(defaultTargetUsername) ? "everyone" : defaultTargetUsername
         };
-        
+
         _context.UserEncryptionMethods.Add(method);
         await _context.SaveChangesAsync();
-        
+
         return RedirectToAction("Profile");
     }
 
@@ -227,17 +196,17 @@ public class AccountController : Controller
         {
             return RedirectToAction("Login");
         }
-        
+
         var method = await _context.UserEncryptionMethods
             .FirstOrDefaultAsync(m => m.Id == id && m.UserId == int.Parse(userId));
-        
+
         if (method != null)
         {
             _context.UserEncryptionMethods.Remove(method);
             await _context.SaveChangesAsync();
             TempData["Success"] = "Методът е изтрит успешно!";
         }
-        
+
         return RedirectToAction("Profile");
     }
 
@@ -249,22 +218,22 @@ public class AccountController : Controller
         {
             return RedirectToAction("Login");
         }
-        
+
         var method = await _context.UserEncryptionMethods
             .FirstOrDefaultAsync(m => m.Id == id && m.UserId == int.Parse(userId));
-        
+
         if (method == null)
         {
             TempData["Error"] = "Методът не е намерен!";
             return RedirectToAction("Profile");
         }
-        
+
         // Запази основната информация
         HttpContext.Session.SetString("SelectedMethodId", method.Id.ToString());
         HttpContext.Session.SetString("SelectedMethodName", method.MethodName);
         HttpContext.Session.SetString("SelectedCustomSeed", method.CustomSeed.ToString());
         HttpContext.Session.SetString("SelectedCustomPassword", method.CustomPassword);
-        
+
         // Запази паролата по подразбиране (ако има)
         if (!string.IsNullOrEmpty(method.DefaultPassword))
         {
@@ -274,10 +243,10 @@ public class AccountController : Controller
         {
             HttpContext.Session.Remove("SelectedDefaultPassword");
         }
-        
+
         // Запази получателя по подразбиране
         HttpContext.Session.SetString("SelectedDefaultTargetUsername", method.DefaultTargetUsername ?? "everyone");
-        
+
         TempData["Success"] = $"Избран е метод: {method.MethodName}";
         return RedirectToAction("Index", "Encryption");
     }
@@ -291,7 +260,7 @@ public class AccountController : Controller
         HttpContext.Session.Remove("SelectedCustomPassword");
         HttpContext.Session.Remove("SelectedDefaultPassword");
         HttpContext.Session.Remove("SelectedDefaultTargetUsername");
-        
+
         TempData["Success"] = "Избраният метод е премахнат.";
         return RedirectToAction("Index", "Encryption");
     }
