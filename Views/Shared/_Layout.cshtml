@@ -11,18 +11,44 @@
 </head>
 <body>
     <nav class="navbar">
-    <a href="/" class="nav-home">
-    <img src="~/images/oni.webp" alt="CIPHERX" class="nav-logo" />
+        <div style="display: flex; align-items: center; gap: 20px; width: 100%;">
+            <a href="/" class="nav-home">
+                <img src="~/images/oni.webp" alt="CIPHERX" class="nav-logo" />
+            </a>
+            
+            <div style="display: flex; gap: 8px; flex: 1;">
+    <a href="/Encryption" class="nav-btn @(ViewData["Page"]?.ToString() == "encrypt" ? "active" : "")">
+        <span class="nav-btn-text">КРИПТИРАНЕ</span>
     </a>
-    <div class="nav-links">
-        <a href="/Encryption" class="nav-btn @(ViewData["Page"]?.ToString() == "encrypt" ? "active" : "")">
-            <span class="nav-btn-text">КРИПТИРАНЕ</span>
-        </a>
-        <a href="/Explanation" class="nav-btn @(ViewData["Page"]?.ToString() == "explain" ? "active" : "")">
-            <span class="nav-btn-text">КАК РАБОТИ</span>
-        </a>
-    </div>
-</nav>
+    
+    <a href="/Explanation" class="nav-btn @(ViewData["Page"]?.ToString() == "explain" ? "active" : "")">
+        <span class="nav-btn-text">КАК РАБОТИ</span>
+    </a>
+</div>
+            
+            <!-- Секция за вход/изход и потребител -->
+            <div style="display: flex; align-items: center; gap: 15px;">
+                @if (!string.IsNullOrEmpty(Context.Session.GetString("UserId")))
+                {
+                    <a href="/Account/Profile" style="color: var(--red); font-family: var(--mono); text-decoration: none;">
+                         <i class="fas fa-user"></i> @Context.Session.GetString("Username")
+                    </a>
+                    <a href="/Account/Logout" class="nav-btn" style="background: var(--red-dark);">
+                        <span class="nav-btn-text">ИЗХОД</span>
+                    </a>
+                }
+                else
+                {
+                    <a href="/Account/Login" class="nav-btn">
+                        <span class="nav-btn-text">ВХОД</span>
+                    </a>
+                    <a href="/Account/Register" class="nav-btn" style="background: var(--surface2); border: 1px solid var(--red);">
+                        <span class="nav-btn-text">РЕГИСТРАЦИЯ</span>
+                    </a>
+                }
+            </div>
+        </div>
+    </nav>
 
     <main>
         @RenderBody()
