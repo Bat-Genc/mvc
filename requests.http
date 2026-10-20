@@ -1,0 +1,82 @@
+# Local practice requests for the MVC actions.
+# Start the app with the HTTPS launch profile before sending these requests.
+# Keep @baseUrl local. Registration and profile/method POSTs change the local database.
+@baseUrl = https://localhost:7093
+@practiceUsername = practice-user
+@practiceEmail = practice-user@example.test
+@practicePassword = Practice123!
+
+### Home page
+GET {{baseUrl}}/
+
+### Home form POST
+POST {{baseUrl}}/Home/Index
+Content-Type: application/x-www-form-urlencoded
+
+inputText=Practice message for the home page
+
+### Privacy page
+GET {{baseUrl}}/Home/Privacy
+
+### Error page
+GET {{baseUrl}}/Home/Error
+
+### Explanation page
+GET {{baseUrl}}/Explanation/Index
+
+### Encryption page
+GET {{baseUrl}}/Encryption/Index
+
+### Encrypt text (form POST)
+POST {{baseUrl}}/Encryption/Index
+Content-Type: application/x-www-form-urlencoded
+
+inputText=Practice message for encryption&cryptoText=&decryptMode=false&password=practice-secret&receiverUsername=anonymous
+
+### Registration page
+GET {{baseUrl}}/Account/Register
+
+### Register a local practice user (creates a database record)
+POST {{baseUrl}}/Account/Register
+Content-Type: application/x-www-form-urlencoded
+
+username={{practiceUsername}}&email={{practiceEmail}}&password={{practicePassword}}
+
+### Login page
+GET {{baseUrl}}/Account/Login
+
+### Log in as the practice user (stores a session cookie)
+POST {{baseUrl}}/Account/Login
+Content-Type: application/x-www-form-urlencoded
+
+username={{practiceUsername}}&password={{practicePassword}}
+
+### Profile page (requires the practice-user session)
+GET {{baseUrl}}/Account/Profile
+
+### Update the logged-in practice user (changes a database record)
+POST {{baseUrl}}/Account/UpdateProfile
+Content-Type: application/x-www-form-urlencoded
+
+username={{practiceUsername}}&email={{practiceEmail}}&newPassword=
+
+### Add-encryption-method page (requires login)
+GET {{baseUrl}}/Account/AddEncryptionMethod
+
+### Add a practice encryption method (creates a database record)
+POST {{baseUrl}}/Account/AddEncryptionMethod
+Content-Type: application/x-www-form-urlencoded
+
+methodName=Practice method&customSeed=12345&customPassword=practice-secret&defaultPassword=&defaultTargetUsername=everyone
+
+### Delete method route (GET; id=0 is a safe no-op)
+GET {{baseUrl}}/Account/DeleteEncryptionMethod?id=0
+
+### Select method route (requires login; id=0 is a safe no-op)
+GET {{baseUrl}}/Account/UseEncryptionMethod?id=0
+
+### Clear selected method from the session
+GET {{baseUrl}}/Account/ClearSelectedMethod
+
+### Log out and clear the session
+GET {{baseUrl}}/Account/Logout
